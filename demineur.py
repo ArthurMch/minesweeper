@@ -19,45 +19,43 @@ class Grid:
         self.row = row
         
     # return un index de cells en int
-    def positionCells(self, c, r):
-        index = c * self.column + r
+    def calculateIndexCells(self, column, row):
+        index = column * self.column + row
         return index
     
-    def isPositionValid(self, c, r):
-        if c > self.column -1 or r > self.row -1 or c < 0 or r < 0:
+    
+    def isPositionValid(self, column, row):
+        if column > self.column -1 or row > self.row -1 or column < 0 or row < 0:
             return False
         else:
             return True
         
-    def getCell(self, c, r):
-        if self.isPositionValid(c, r):
-            return self.cells[self.positionCells(c, r)]
+    def getCell(self, column, row):
+        if self.isPositionValid(column, row):
+            return self.cells[self.calculateIndexCells(column, row)]
         return None
         
         
-    
-    
-    #fonction qui calcul quelles sont les cases adjacentes
-    def touchingCells(self, c, r):
+    def returnPositionOfAllAdjacentCells(self, column, row):
         
         touchingCells = []
-        for colonne in range(c-1, c+2):
-            for ligne in range(r-1, r+2):
-                if colonne == c and ligne == r:
+        for colonne in range(column-1, column+2):
+            for ligne in range(row-1, row+2):
+                if colonne == column and ligne == row:
                     continue
                 if self.isPositionValid(colonne, ligne):
                     touchingCells.append(self.getCell(colonne, ligne)) 
         return touchingCells
     
-    def NumberOfBomb(self, Array):
-        i = 0
+    
+    def countNumberOfBombInArray(self, Array):
+        bombesCount = 0
         for bombe in Array:
             if bombe.bombeOrNot():
-                i += 1
-        return i
+                bombesCount += 1
+        return bombesCount
     
-    
-        
+
     
     # print function
     def __str__ (self):
@@ -72,7 +70,7 @@ class Cell:
         self.isRevealed = False
         self.button = None 
         
-    def bombeOrNot(self):
+    def isCellBombeOrNot(self):
         return self.state == 1
         
             
@@ -83,22 +81,22 @@ class Cell:
         return f'{self.state}'
 
 
-def generateGrid(c, r, mine):
+def generateRandomGrid(column, row, bombs):
     allCells = []
-    safeCells = (c*r)-mine
+    safeCells = (column*row)-bombs
     
     while(len(allCells) != safeCells):
         allCells.append(Cell(0))
-    for i in range(mine):
+    for bomb in range(bombs):
         allCells.append(Cell(1))
     np.random.shuffle(allCells)
-    grid = Grid(allCells, c, r)         
+    grid = Grid(allCells, column, row)         
     return grid
 
 
         
 # generate grid function
-class GrapGrid:
+class GraphicGrid:
     def __init__(self, grille):
         self.grille = grille
         self.root = tk.Tk()
@@ -136,12 +134,7 @@ class GrapGrid:
             
         self.root.mainloop()
         
-    """def updateTextSize(self):
-            font_size = (self.grille.column + self.grille.row) / 3
-            style = ttk.Style()
-            style.configure("TLabel", font=('Helvetica', font_size))"""
-
-    
+        
     def recursivZeroCells(self, c, r):
         for colonne in range(c-1, c+2):
             for ligne in range(r-1, r+2):
@@ -177,7 +170,7 @@ class GrapGrid:
             else:
                 self.root.destroy()
         else:
-            bombes = self.grille.NumberOfBomb(self.grille.touchingCells(x, y))
+            bombes = self.grille.NumberOfBomb(self.grille.returnPositionOfAllAdjacentCells(x, y))
             if bombes == 0:
                 self.recursivZeroCells(x, y)
                 bombes = " "
@@ -185,10 +178,6 @@ class GrapGrid:
             label.configure(background="grey", anchor="center")
             self.grille.getCell(x, y).button.grid_remove()
             label.grid(row=x, column=y, sticky="nsew")
-            
-
-
-
 
 
 # main        
